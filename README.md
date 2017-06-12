@@ -2,7 +2,7 @@
 
 ## Introduction
 
-![GitHub Logo](/images/architecture_1.png)
+![GitHub Logo](/images/architecture(1).png)
 *Figure 1: System Architecture*
 
 ###### Overview
@@ -15,7 +15,7 @@ generated and stored by Holmes-Totem and Holmes-Totem-Dynamic. The goals are:
 
 1. Define the malware attributes necessary for relationship detection through querying.
 2. Implement Machine Learning algorithms for relationship detection.
-3. Implement an algorithm for scoring relationships.
+3. Implement an algorithm for aggregating and scoring the final relationships.
 4. Visualize relationships for the client.
 
 This system will perform malware relationship detection and scoring by using a range of queries and ML algorithms. We will implement and optimize some existing and new ML algorithms in order to ensure accuracy and efficiency. The whole relationship detection and rating process will go through two stages and at the end the user will receive a visual representation of the generated final relationships.
