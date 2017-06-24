@@ -2,7 +2,7 @@
 
 ## Introduction
 
-![GitHub Logo](/images/architecture(1).png)
+![GitHub Logo](/images/architecture.png)
 *Figure 1: System Architecture*
 
 ###### Overview
