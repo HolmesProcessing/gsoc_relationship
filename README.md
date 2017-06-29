@@ -195,3 +195,4 @@ This query is similar to 1.2 (malware->domain)
 This query is similar to 1.1 (malware->malware). The only difference is the algorithm.
 
 In addtion, the query and storage about domain and IP are similar to that of malware.
+
