@@ -59,7 +59,8 @@ The relationships between artefacts will be defined in detail by the indicators 
 There are three kinds of query for final relationships. They are queries for malware sample, domain and IP seperately.
 
 1. When quering a malware sample, we can
-	1.1. Give relationship scores between malware sample. We use an algorithm considering the every features between malware sample. It is **malware->malware**. 
+	1.1 Give relationship scores between malware sample. We use an algorithm considering the every features between malware sample. It is **malware->malware**. 
+	
 	1.2 Give relationship scores between malware and domain. The relationships include direct relationships ( MalwareA <-> Domain ) and indirect relationships
 ( MalwareA <-> MalwareB <-> Domain and MalwareA <-> IP <-> Domain ). It is **malware->domain**.
 
@@ -174,16 +175,21 @@ To get the final relationship score, we first query in the primary relationship 
 
 1.1 malware->malware:
 
-	1). Do Q1 ( give me all relationships for malware_A ) in primary_relationships_table and we can get malware_A_features. 
-	2). Do Q2 ( give me all malware objects that subscribe to the each element in the malware_A_features ) in mv_primary_relationships_table and we can get related_malwares. 
-	3). Do Q1 ( give me all relationships for each element in the related_malwares) in primary_relationships_table and then give the score between element in the related_malwares and malware_A. To give the exact final relationship score, we must consider the same and different parts of two malwares.
-	4). Finally we save the result malware_final_score in database. 
+1). Do Q1 ( give me all relationships for malware\_A ) in primary\_relationships\_table and we can get malware\_A\_features. 
+
+2). Do Q2 ( give me all malware objects that subscribe to the each element in the malware\_A\_features ) in mv\_primary\_relationships\_table and we can get related_malwares. 
+
+3). Do Q1 ( give me all relationships for each element in the related\_malwares) in primary\_relationships\_table and then give the score between element in the related\_malwares and malware\_A. To give the exact final relationship score, we must consider the same and different parts of two malwares.
+
+4). Finally we save the result malware\_final\_score in database. 
  
 1.2 malware->domain: 
 
-	1). Do Q1 ( give me all domain_relationships for malware_A ) in primary_relationships_table and we can get a list of malware_A_direct_domains. 
-	2). Do Q2 ( give me all domain_relationships for each element in related_malwares) and then we can give scores between malware_A and each different_domain (related_malwares have and malware_A dont have) by an algorithms considering the final relationship score between malwares and the number of the domain. So, we can get a list of malware_A_malware_indirect_domains.
-	3). Do Q1 ( give me all IP_relationships for malware_A ) and then still do Q1 ( give me all domain_relationships for IP ). So we can get a list of malware_A_IP_indirect_domains.
+1). Do Q1 ( give me all domain\_relationships for malware\_A ) in primary\_relationships\_table and we can get a list of malware\_A\_direct\_domains. 
+
+2). Do Q2 ( give me all domain\_relationships for each element in related\_malwares) and then we can give scores between malware\_A and each different\_domain (related\_malwares have and malware\_A dont have) by an algorithms considering the final relationship score between malwares and the number of the domain. So, we can get a list of malware\_A\_malware\_indirect\_domains.
+
+3). Do Q1 ( give me all IP\_relationships for malware\_A ) and then still do Q1 ( give me all domain_relationships for IP ). So we can get a list of malware\_A\_IP\_indirect\_domains.
 
 1.3 malware->IP: 
 
