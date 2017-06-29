@@ -56,6 +56,44 @@ The whole purpose of this stage of the process is to look for meaningful primary
 The relationships between artefacts will be defined in detail by the indicators that the Querying and ML components will detect/calculate. The first step of relationships discovery is finding good indicators of relationships between the different artefacts. These indicators are extracted by processing the analytic results from Holmes Totem (Dynamic). The components responsible for performing this analytic processes are the Query and ML components.
 
 ###### Final Relationships
+There are three kinds of query for final relationships. They are queries for malware sample, domain and IP seperately.
+
+1. When quering a malware sample, we can
+	1.1. Give relationship scores between malware sample. We use an algorithm considering the every features between malware sample. It is **malware->malware**. 
+	1.2 Give relationship scores between malware and domain. The relationships include direct relationships ( MalwareA <-> Domain ) and indirect relationships
+( MalwareA <-> MalwareB <-> Domain and MalwareA <-> IP <-> Domain ). It is **malware->domain**.
+
+	1.3 Give relationship scores between malware and IP. The relationships include direct and indirect relationships, which is similar to the malware->domain. It is **malware->IP**.
+	
+	1.4 Choose part of features to generate relationship scores between malware sample. In normal, we consider all features to give a score (1.1 does). Furthermore, in this pro mode, we choose the features we like. It is **malware->malware PRO**.
+2. When quering a domain, we can
+
+	2.1  Give relationship scores between domain and malware. It is similar to 1.2 and includes direct relationships ( Domain <-> MalwareA ) and indirect relationships
+( Domain <-> MalwareA <-> MalwareB and Domain <-> IP <-> MalwareA ). It is **domain->malware**.
+
+	2.2 Give relationship scores between domain. It includes direct relationships ( DomainX <-> DomainY ) and indirect relationships ( DomainX <-> Malware <-> DomainY and DomainX <-> IP <-> DomainY ). In addition, 2nd level indirect relationships ( DomainX <-> MalwareA <-> MalwareB <-> DomainY ) are also available. It is **domain->domain**. 
+	
+	2.3 Give relationship scores between domain and IP. It includes direct relationships ( Domain X <-> IP ) and indirect relationships ( DomainX <-> Malware <-> IP and DomainX <-> DomainY <-> IP and DomainX <-> IPA <-> IPB). It is **domain->IP**.
+3. When quering an IP, the relationship results are similar to querying domain. They are **IP->malware**, **IP->IP** and **IP->domain**.
+
+###### Direct and Indirect Relationships
+The difference between direct and indirect relationships are based on whether this relationship can be obtained directly from the primary_table. 
+
+We take **1.2 malware->domain** in the Final Relationships section as an example.
+	
+1. Direct relationships:
+
+	To Malware\_A, we can get a list of domains by Cuckoo and these relationships are saved in primary\_table. They are direct relationships and we present them like this (Malware_A <-> Domain).
+
+2. Indirect relationships:
+
+	2.1 To Malware\_A, we can get a list of malwares with high confidence scores called Malware\_A\_list. We also can get a list of domains by Cuckoo’s analysis of these malwares, so there are indirect relationships between Malware\_A and domains.
+( Malware\_A <-> Malware\_A\_list <-> Domains ).
+ 
+	2.2 To Malware\_A, we can get a list of IPs directly connected to it. These IPs may associate with one or more domains. So there are indirect relationships between Malware\_A and domains. (Malware\_A <-> IP <-> Domains).
+	
+	2.3 To all indirect relationships, it is necessary to design an algorithm to give confidence relationship scores. 
+
 
 
 ## Storage and Schema
@@ -77,6 +115,26 @@ The original base table easily satisfies Q1. The table created through the MV ca
 Even Q3 can be easily addressed with a slightly different MV.
 
 The relationship values for each primary relationship can be either direct values or references unique identifiers that can be used to query lookup tables for additional details on the relationship value. Lookup tables are generated for a specific subset of relationship values.
+
+###### Final relationship storage
+The final relationship storage is used to extract the query result when an artefact is queried second time or more. In storage, we do not distinguish between direct and indirect relationships and we use one table to save all final relationship.
+
+	final_relationship_table(
+		query_object_id text,
+		relationship_object_id text,
+		relationship_type text,              
+		confidence_score int,
+	same_indicators_between_object  list,     
+		TTL int,
+		PRIMARY KEY ( query_object_id, relationship_type )
+		) 
+
+1). query\_object\_id and relationship\_object\_id consist of the relationship pair.
+
+2). relationship\_type represents the relationship type between query\_object and relationship\_object and is granularity. It can be malware\_direct\_domains,  malware\_malware\_indirect\_domains, malware\_IP\_indirect\_domains and so on.
+We take malware\_IP\_indirect\_domain as an example. This relationship is indirect relationship and relationship are malware <-> IP <-> domain.
+
+3). same\_indicators\_between\_object is a list and used to display the relationships in the website.
 
 
 ## Implementation
@@ -111,3 +169,28 @@ This component will look for atomic indicators of relationships. Atomic indicato
 This component will utilize ML algorithms to train models based on a labeled dataset and then assign every new unknown incoming artefact (depending on the type of artefact) to one of the trained malicious clusters/classes.
 
 #### Final Relationships Generator
+###### Query Example
+To get the final relationship score, we first query in the primary relationship table. I will show query examples.
+
+1.1 malware->malware:
+
+	1). Do Q1 ( give me all relationships for malware_A ) in primary_relationships_table and we can get malware_A_features. 
+	2). Do Q2 ( give me all malware objects that subscribe to the each element in the malware_A_features ) in mv_primary_relationships_table and we can get related_malwares. 
+	3). Do Q1 ( give me all relationships for each element in the related_malwares) in primary_relationships_table and then give the score between element in the related_malwares and malware_A. To give the exact final relationship score, we must consider the same and different parts of two malwares.
+	4). Finally we save the result malware_final_score in database. 
+ 
+1.2 malware->domain: 
+
+	1). Do Q1 ( give me all domain_relationships for malware_A ) in primary_relationships_table and we can get a list of malware_A_direct_domains. 
+	2). Do Q2 ( give me all domain_relationships for each element in related_malwares) and then we can give scores between malware_A and each different_domain (related_malwares have and malware_A dont have) by an algorithms considering the final relationship score between malwares and the number of the domain. So, we can get a list of malware_A_malware_indirect_domains.
+	3). Do Q1 ( give me all IP_relationships for malware_A ) and then still do Q1 ( give me all domain_relationships for IP ). So we can get a list of malware_A_IP_indirect_domains.
+
+1.3 malware->IP: 
+
+This query is similar to 1.2 (malware->domain)
+
+1.4 malware->malware PRO:
+
+This query is similar to 1.1 (malware->malware). The only difference is the algorithm.
+
+The query and storage about domain and IP are similar to that of malware.
