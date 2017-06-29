@@ -175,21 +175,16 @@ To get the final relationship score, we first query in the primary relationship 
 
 1.1 malware->malware:
 
-1). Do Q1 ( give me all relationships for malware\_A ) in primary\_relationships\_table and we can get malware\_A\_features. 
-
-2). Do Q2 ( give me all malware objects that subscribe to the each element in the malware\_A\_features ) in mv\_primary\_relationships\_table and we can get related_malwares. 
-
-3). Do Q1 ( give me all relationships for each element in the related\_malwares) in primary\_relationships\_table and then give the score between element in the related\_malwares and malware\_A. To give the exact final relationship score, we must consider the same and different parts of two malwares.
-
-4). Finally we save the result malware\_final\_score in database. 
+1. Do Q1 ( give me all relationships for malware\_A ) in primary\_relationships\_table and we can get malware\_A\_features. 
+2. Do Q2 ( give me all malware objects that subscribe to the each element in the malware\_A\_features ) in mv\_primary\_relationships\_table and we can get related_malwares. 
+3. Do Q1 ( give me all relationships for each element in the related\_malwares) in primary\_relationships\_table and then give the score between element in the related\_malwares and malware\_A. To give the exact final relationship score, we must consider the same and different parts of two malwares.
+4. Finally we save the result malware\_final\_score in database. 
  
 1.2 malware->domain: 
 
-1). Do Q1 ( give me all domain\_relationships for malware\_A ) in primary\_relationships\_table and we can get a list of malware\_A\_direct\_domains. 
-
-2). Do Q2 ( give me all domain\_relationships for each element in related\_malwares) and then we can give scores between malware\_A and each different\_domain (related\_malwares have and malware\_A dont have) by an algorithms considering the final relationship score between malwares and the number of the domain. So, we can get a list of malware\_A\_malware\_indirect\_domains.
-
-3). Do Q1 ( give me all IP\_relationships for malware\_A ) and then still do Q1 ( give me all domain_relationships for IP ). So we can get a list of malware\_A\_IP\_indirect\_domains.
+1. Do Q1 ( give me all domain\_relationships for malware\_A ) in primary\_relationships\_table and we can get a list of malware\_A\_direct\_domains. 
+2. Do Q2 ( give me all domain\_relationships for each element in related\_malwares) and then we can give scores between malware\_A and each different\_domain (related\_malwares have and malware\_A dont have) by an algorithms considering the final relationship score between malwares and the number of the domain. So, we can get a list of malware\_A\_malware\_indirect\_domains.
+3. Do Q1 ( give me all IP\_relationships for malware\_A ) and then still do Q1 ( give me all domain_relationships for IP ). So we can get a list of malware\_A\_IP\_indirect\_domains.
 
 1.3 malware->IP: 
 
@@ -199,4 +194,4 @@ This query is similar to 1.2 (malware->domain)
 
 This query is similar to 1.1 (malware->malware). The only difference is the algorithm.
 
-The query and storage about domain and IP are similar to that of malware.
+In addtion, the query and storage about domain and IP are similar to that of malware.
