@@ -56,7 +56,7 @@ The whole purpose of this stage of the process is to look for meaningful primary
 The relationships between artefacts will be defined in detail by the indicators that the Querying and ML components will detect/calculate. The first step of relationships discovery is finding good indicators of relationships between the different artefacts. These indicators are extracted by processing the analytic results from Holmes Totem (Dynamic). The components responsible for performing this analytic processes are the Query and ML components.
 
 ###### Final Relationships
-
+The final relationships are relationships among Malware, Domain and IP. These relationships will look as follows: 
 
  Final relationship (Direct relationship) | Indirect relationships 
   ----------------------------------------- | -------------
@@ -97,26 +97,6 @@ Even Q3 can be easily addressed with a slightly different MV.
 
 The relationship values for each primary relationship can be either direct values or references unique identifiers that can be used to query lookup tables for additional details on the relationship value. Lookup tables are generated for a specific subset of relationship values.
 
-###### Final relationship storage
-The final relationship storage is used to extract the query result when an artefact is queried second time or more. In storage, we do not distinguish between direct and indirect relationships and we use one table to save all final relationship.
-
-	final_relationship_table(
-		query_object_id text,
-		relationship_object_id text,
-		relationship_type text,              
-		confidence_score int,
-	same_indicators_between_object  list,     
-		TTL int,
-		PRIMARY KEY ( query_object_id, relationship_type )
-		) 
-
-1). query\_object\_id and relationship\_object\_id consist of the relationship pair.
-
-2). relationship\_type represents the relationship type between query\_object and relationship\_object and is granularity. It can be malware\_direct\_domains,  malware\_malware\_indirect\_domains, malware\_IP\_indirect\_domains and so on.
-We take malware\_IP\_indirect\_domain as an example. This relationship is indirect relationship and relationship are malware <-> IP <-> domain.
-
-3). same\_indicators\_between\_object is a list and used to display the relationships in the website.
-
 
 ## Implementation
 
@@ -149,4 +129,21 @@ This component will look for atomic indicators of relationships. Atomic indicato
 
 This component will utilize ML algorithms to train models based on a labeled dataset and then assign every new unknown incoming artefact (depending on the type of artefact) to one of the trained malicious clusters/classes.
 
+#### Final Relationships Score Generator
 
+###### Direct relationship score algorithm(WIP)
+Direct relationship score algorithm gives the similarity score between the query object and other object has direct relationship to query object. This algorithm considers relationship_type and weights in primary relationship table between two object.
+
+###### Indirect relationship score algorithm(WIP)
+The algorithm considers  
+1). the scores of direct relationships that consist the indirect relationships.  
+2). the number of different relationship routes to a certain indirect relationship.
+
+## Visualization (WIP)
+#### Web Page
+###### Query Page
+Query page provides the searching for hash,domain and IP and returns relationship page.
+###### Relationship Page 
+Relationship page are designed by D3.js and shows the relationship result.
+
+#### Implementation
