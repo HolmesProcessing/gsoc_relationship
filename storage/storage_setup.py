@@ -14,27 +14,38 @@ def cluster_setup(ip_address, username, password, keyspace):
 
 
 def schema_setup(ip_addresses, username, password, keyspace):
+	
 	session = cluster_setup(ip_addresses, username, password, keyspace)
 
 	session.execute(
 		"""CREATE TABLE IF NOT EXISTS relationship_primary_object_table(
-		object_id TEXT, 
-		relationship_type TEXT, 
-		relationship_value TEXT, 
-		timestamp timeuuid, 
-		weight int, 
+		object_id TEXT,
+		relationship_type TEXT,
+		relationship_value TEXT,
+		timestamp timeuuid,
 		PRIMARY KEY ((object_id), relationship_type, relationship_value, timestamp)
-		);		
+		);
 		"""
 		)
+
 	session.execute(
-		"""CREATE MATERIALIZED VIEW IF NOT EXISTS mv_relationship_value_table AS
+		"""CREATE MATERIALIZED VIEW IF NOT EXISTS mv_relationship_primary_object_value_table AS
 		SELECT * FROM relationship_primary_object_table
 		WHERE object_id IS NOT NULL
 		AND relationship_type IS NOT NULL
 		AND relationship_value IS NOT NULL
 		AND timestamp IS NOT NULL
-		AND weight IS NOT NULL
+		PRIMARY KEY ((relationship_value), object_id, relationship_type, timestamp);
+		"""
+		)
+
+	session.execute(
+		"""CREATE MATERIALIZED VIEW IF NOT EXISTS mv_relationship_primary_object_type_table AS
+		SELECT * FROM relationship_primary_object_table
+		WHERE object_id IS NOT NULL
+		AND relationship_type IS NOT NULL
+		AND relationship_value IS NOT NULL
+		AND timestamp IS NOT NULL
 		PRIMARY KEY ((relationship_value), object_id, relationship_type, timestamp);
 		"""
 		)
@@ -46,10 +57,10 @@ def main(argv):
 		schema_setup(argv[0],argv[1],argv[2],argv[3])
 		print "Storage setup was successful."
 	else:
-		print "Some arguments are missing. You need exactly 4 arguments."
 		print 'Number of arguments:', len(argv), 'arguments.'
+		print "You need exactly 4 arguments: ip address, username, password, keyspace - in that order"
    		print 'Argument List:', str(argv)
-	
+
 
 
 if __name__ == '__main__':
