@@ -56,7 +56,26 @@ The whole purpose of this stage of the process is to look for meaningful primary
 The relationships between artefacts will be defined in detail by the indicators that the Querying and ML components will detect/calculate. The first step of relationships discovery is finding good indicators of relationships between the different artefacts. These indicators are extracted by processing the analytic results from Holmes Totem (Dynamic). The components responsible for performing this analytic processes are the Query and ML components.
 
 ###### Final Relationships
+The final relationships are relationships among Malware, Domain and IP. These relationships will look as follows: 
 
+ Final relationship (Direct relationship) | Indirect relationships 
+  ----------------------------------------- | -------------
+  Malware -> Malware | \
+  Malware -> Domain  | 1. Malware -> Malware -> IP </br>2. Malware -> IP -> Domain 
+  Malware -> IP | 1. Malware -> Malware -> IP </br> 2. Malware -> Domain -> IP  
+  Domain -> Malware | 1. Domain -> Malware -> Malware </br> 2. Domain -> Domain -> Malware </br> 3. Domain -> IP -> Malware
+  Domain -> Domain | 1. Domain -> Malware -> Domain </br> 2. Domain -> IP -> Domain </br> 3. Domain -> Malware -> Malware -> Domain (optional)
+  Domain -> IP | 1. Domain -> Malware -> IP </br> 2. Domain -> Domain -> IP </br> 3. Domain -> IP -> IP
+  IP | All IP final relationships are similar to Domain Final relationships
+*Table 1: Definitions for Final relationships*
+
+The direct relationships can be retrieved directly from primary relationships. 
+It is obviously that column:Final relationship is same to column:Direct relationship, so they are merged into one column.
+
+The indirect relationships need other artefact as intermediary to transfer relationship.
+
+
+ 
 
 ## Storage and Schema
 
@@ -102,7 +121,7 @@ This component will look for atomic indicators of relationships. Atomic indicato
  (av_similar_to, VirusTotal, signature_similarity) |  
  (yara_similar_to, YARA, complex_AV_match) |  
 
-*Table 1: Definitions for primary relationships*
+*Table 2: Definitions for primary relationships*
 
 
 
@@ -110,4 +129,21 @@ This component will look for atomic indicators of relationships. Atomic indicato
 
 This component will utilize ML algorithms to train models based on a labeled dataset and then assign every new unknown incoming artefact (depending on the type of artefact) to one of the trained malicious clusters/classes.
 
-#### Final Relationships Generator
+#### Final Relationships Score Generator
+
+###### Direct relationship score algorithm(WIP)
+Direct relationship score algorithm gives the similarity score between the query object and other object has direct relationship to query object. This algorithm considers relationship_type and weights in primary relationship table between two object.
+
+###### Indirect relationship score algorithm(WIP)
+The algorithm considers  
+1). the scores of direct relationships that consist the indirect relationships.  
+2). the number of different relationship routes to a certain indirect relationship.
+
+## Visualization (WIP)
+#### Web Page
+###### Query Page
+Query page provides the searching for hash,domain and IP and returns relationship page.
+###### Relationship Page 
+Relationship page are designed by D3.js and shows the relationship result.
+
+#### Implementation
