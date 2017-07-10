@@ -56,7 +56,11 @@ The whole purpose of this stage of the process is to look for meaningful primary
 The relationships between artefacts will be defined in detail by the indicators that the Querying and ML components will detect/calculate. The first step of relationships discovery is finding good indicators of relationships between the different artefacts. These indicators are extracted by processing the analytic results from Holmes Totem (Dynamic). The components responsible for performing this analytic processes are the Query and ML components.
 
 ###### Final Relationships
-The final relationships are relationships among Malware, Domain and IP. These relationships will look as follows: 
+
+The final relationships define how objects in the system are associated with each other. These are created by analyzing the primary relationships and determining if and how strongly objects are related. Currently, we focus on relationships among malwares, domains, and IPs.  
+The final relationships consist of direct relationships and indirect relationships. The direct relationships can be retrieved directly from primary relationships, and the indirect relationships need other objects as the intermediary to transfer relationship. We seek to identify the following:  
+
+(The column: Final relationship has same content to the column: Direct relationship, so they are merged into one column.)
 
  Final relationship (Direct relationship) | Indirect relationships 
   ----------------------------------------- | -------------
@@ -67,15 +71,8 @@ The final relationships are relationships among Malware, Domain and IP. These re
   Domain -> Domain | 1. Domain -> Malware -> Domain </br> 2. Domain -> IP -> Domain </br> 3. Domain -> Malware -> Malware -> Domain (optional)
   Domain -> IP | 1. Domain -> Malware -> IP </br> 2. Domain -> Domain -> IP </br> 3. Domain -> IP -> IP
   IP | All IP final relationships are similar to Domain Final relationships
+  
 *Table 1: Definitions for Final relationships*
-
-The direct relationships can be retrieved directly from primary relationships. 
-It is obviously that column:Final relationship is same to column:Direct relationship, so they are merged into one column.
-
-The indirect relationships need other artefact as intermediary to transfer relationship.
-
-
- 
 
 ## Storage and Schema
 
@@ -123,8 +120,6 @@ This component will look for atomic indicators of relationships. Atomic indicato
 
 *Table 2: Definitions for primary relationships*
 
-
-
 ###### ML Component
 
 This component will utilize ML algorithms to train models based on a labeled dataset and then assign every new unknown incoming artefact (depending on the type of artefact) to one of the trained malicious clusters/classes.
@@ -132,18 +127,25 @@ This component will utilize ML algorithms to train models based on a labeled dat
 #### Final Relationships Score Generator
 
 ###### Direct relationship score algorithm(WIP)
-Direct relationship score algorithm gives the similarity score between the query object and other object has direct relationship to query object. This algorithm considers relationship_type and weights in primary relationship table between two object.
+
+The direct relationship score algorithm gives the similarity score between the object queried and the related object. This algorithm considers relationship_type and weights from primary relationship table between two objects.
 
 ###### Indirect relationship score algorithm(WIP)
-The algorithm considers  
-1). the scores of direct relationships that consist the indirect relationships.  
+
+The algorithm considers:  
+1). the scores of direct relationships that consist of the indirect relationship.
 2). the number of different relationship routes to a certain indirect relationship.
 
 ## Visualization (WIP)
+
 #### Web Page
+
 ###### Query Page
-Query page provides the searching for hash,domain and IP and returns relationship page.
+
+Query page provides the searching for hash, domain, and IP and returns relationship page.
+
 ###### Relationship Page 
-Relationship page are designed by D3.js and shows the relationship result.
+
+Relationship page is designed by D3.js and shows the relationship result.
 
 #### Implementation
