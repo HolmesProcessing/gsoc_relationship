@@ -57,6 +57,22 @@ The relationships between artefacts will be defined in detail by the indicators 
 
 ###### Final Relationships
 
+The final relationships define how objects in the system are associated with each other. These are created by analyzing the primary relationships and determining if and how strongly objects are related. Currently, we focus on relationships among malwares, domains, and IPs.  
+The final relationships consist of direct relationships and indirect relationships. The direct relationships can be retrieved directly from primary relationships, and the indirect relationships need other objects as the intermediary to transfer relationship. We seek to identify the following:  
+
+(The column: Final relationship has same content to the column: Direct relationship, so they are merged into one column.)
+
+ Final relationship (Direct relationship) | Indirect relationships 
+  ----------------------------------------- | -------------
+  Malware -> Malware | \
+  Malware -> Domain  | 1. Malware -> Malware -> IP </br>2. Malware -> IP -> Domain 
+  Malware -> IP | 1. Malware -> Malware -> IP </br> 2. Malware -> Domain -> IP  
+  Domain -> Malware | 1. Domain -> Malware -> Malware </br> 2. Domain -> Domain -> Malware </br> 3. Domain -> IP -> Malware
+  Domain -> Domain | 1. Domain -> Malware -> Domain </br> 2. Domain -> IP -> Domain </br> 3. Domain -> Malware -> Malware -> Domain (optional)
+  Domain -> IP | 1. Domain -> Malware -> IP </br> 2. Domain -> Domain -> IP </br> 3. Domain -> IP -> IP
+  IP | All IP final relationships are similar to Domain Final relationships
+  
+*Table 1: Definitions for Final relationships*
 
 ## Storage and Schema
 
@@ -102,12 +118,34 @@ This component will look for atomic indicators of relationships. Atomic indicato
  (av_similar_to, VirusTotal, signature_similarity) |  
  (yara_similar_to, YARA, complex_AV_match) |  
 
-*Table 1: Definitions for primary relationships*
-
-
+*Table 2: Definitions for primary relationships*
 
 ###### ML Component
 
 This component will utilize ML algorithms to train models based on a labeled dataset and then assign every new unknown incoming artefact (depending on the type of artefact) to one of the trained malicious clusters/classes.
 
-#### Final Relationships Generator
+#### Final Relationships Score Generator
+
+###### Direct relationship score algorithm(WIP)
+
+The direct relationship score algorithm gives the similarity score between the object queried and the related object. This algorithm considers relationship_type and weights from primary relationship table between two objects.
+
+###### Indirect relationship score algorithm(WIP)
+
+The algorithm considers:  
+1). the scores of direct relationships that consist of the indirect relationship.
+2). the number of different relationship routes to a certain indirect relationship.
+
+## Visualization (WIP)
+
+#### Web Page
+
+###### Query Page
+
+Query page provides the searching for hash, domain, and IP and returns relationship page.
+
+###### Relationship Page 
+
+Relationship page is designed by D3.js and shows the relationship result.
+
+#### Implementation
