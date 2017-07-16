@@ -70,7 +70,7 @@ The final relationships consist of direct relationships and indirect relationshi
   Domain -> Malware | 1. Domain -> Malware -> Malware </br> 2. Domain -> Domain -> Malware </br> 3. Domain -> IP -> Malware
   Domain -> Domain | 1. Domain -> Malware -> Domain </br> 2. Domain -> IP -> Domain </br> 3. Domain -> Malware -> Malware -> Domain (optional)
   Domain -> IP | 1. Domain -> Malware -> IP </br> 2. Domain -> Domain -> IP </br> 3. Domain -> IP -> IP
-  IP | All IP final relationships are similar to Domain Final relationships
+  IP | All IP final relationships are similar to Domain final relationships
   
 *Table 1: Definitions for Final relationships*
 
@@ -126,15 +126,22 @@ This component will utilize ML algorithms to train models based on a labeled dat
 
 #### Final Relationships Score Generator
 
-###### Direct relationship score algorithm(WIP)
+###### Direct relationship score algorithm
 
-The direct relationship score algorithm gives the similarity score between the object queried and the related object. This algorithm considers relationship_type and weights from primary relationship table between two objects.
+The direct relationship score algorithm gives the similarity score between the object queried and the related object. 
+The figure below shows the design of this algorithm. The input: rel\_type scores are extracted from the primary relationship table. An algorithm tuning the weights of each score will be shown in the next paragraph. The final relationship score is the sum of (weight × rel\_type score).  
+This algorithm is also used to tune the weights of each score. The loss function is the sum of these final scores when the queried objects are in the different classifcations and their final score above a threshold. Finally, minimizing the loss measure by gradient descent to get proper weights.
+
+![GitHub Logo](/images/direct_relationship_score.png)
+
+*Figure 4: The Schematic diagram of direct relationship score algorithm*
 
 ###### Indirect relationship score algorithm(WIP)
 
-The algorithm considers:  
-1). the scores of direct relationships that consist of the indirect relationship.
-2). the number of different relationship routes to a certain indirect relationship.
+The indirect relationship score algorithm considers two parts.  
+1). To a certain indirect relationship, it is consisted by direct relationships. We multiply the scores of direct relationships as indirect relationship score.  
+2). To related objects, the kinds of relationships maybe one or more. We use the sigmoid function to the sum of these relationship scores.   
+
 
 ## Visualization (WIP)
 
