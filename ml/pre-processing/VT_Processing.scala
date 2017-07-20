@@ -20,7 +20,7 @@ val VT_results = res_meta_gsoc3_sha256_rdd.join(res_meta_holmes_VT_rdd).map( x =
 
 val signatures_list = VT_results.flatMap(x=>Json.parse(x.results) \ "scans" \\ "result").map(x=>Json.stringify(x)).filter( x=> !(x == "null"))
 val signatures_split = signatures_list.flatMap(x=>x.replaceAll("""["]""","").replaceAll("""\![a-zA-Z0-9\s\+]+""","").replaceAll("""@[a-zA-Z0-9\s\+]+""","").replaceAll("""~[a-zA-Z0-9\s\+]+""","").replaceAll("""[\(|\[|{][a-zA-Z0-9\s\+]*[\)|\]|}]""","").replaceAll("""(\.|\!|\:|\_|\-|\\|/|\[|\])"""," ").split(" ")).filter(x=>(x.size>3)).filter(x=>noNumber(x)).map(x=>x.toLowerCase())
-val prefix = sc.textFile("./t0day/prefix.txt").map(x=>x.toLowerCase())
+val prefix = sc.textFile("./prefix.txt").map(x=>x.toLowerCase())
 val family_signature = signatures_split.subtract(prefix)
 val family_names = sc.parallelize(family_signature.countByValue().toSeq).filter(x=>(x._2>10)).sortBy(x=>x._2,false)
 val seqfamily = family_names.keys.collect().toList
@@ -35,4 +35,4 @@ def findAllInFamily(VT : Seq[String]) : List[Int] ={
     return forlist
 }
 val VT_matrix_final = VT_matrix_initial.map(x=>new VT_matrix_final_class(x.sha256,findAllInFamily(x.VTsplit)))
-VT_matrix_final.toDF().write.format("parquet").save("./t0day/VT_matrix_final.parquet")
+VT_matrix_final.toDF().write.format("parquet").save("./VT_matrix_final.parquet")

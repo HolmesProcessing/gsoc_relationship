@@ -38,4 +38,4 @@ val res_by_sha = sc.cassandraTable[results_by_sha256]("gsoc3","results_data_by_s
 val res_by_sha_rdd = res_by_sha.keyBy(x => (x.sha256,x.service_name))
 val results = res_by_service_rdd.join(res_by_sha_rdd).map(x=> (new FinalResults(x._1._1,x._1._2, unzip(x._2._2.results)))).distinct()
 val Pe_int_matrix_final = results.map(x=>(x.sha256,(Json.parse(x.results) \ "pe_sections"),{if ((Json.parse(x.results) \ "timestamp").isInstanceOf[JsUndefined]) 0.0 else (Json.parse(x.results) \ "timestamp" \\ "timestamp")(0).as[Double]})).filter(x=> !x._2.isInstanceOf[JsUndefined]).map(x=>new Pe_int_matrix_final_class(x._1,findInfoInPe_section(x._2,x._3)))
-Pe_int_matrix_final.toDF().write.format("parquet").save("./t0day/Pe_int_matrix_final.parquet")
+Pe_int_matrix_final.toDF().write.format("parquet").save("./Pe_int_matrix_final.parquet")
