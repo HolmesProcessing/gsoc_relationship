@@ -14,7 +14,7 @@ def cluster_setup(ip_address, username, password, keyspace):
 
 
 def schema_setup(ip_addresses, username, password, keyspace):
-
+  
     session = cluster_setup(ip_addresses, username, password, keyspace)
 
     #Create the Knowledge Base tables and related Materialized Views
@@ -54,11 +54,11 @@ def schema_setup(ip_addresses, username, password, keyspace):
     #Create the Primary Relationships table
 
     session.execute(
-	"""CREATE TYPE IF NOT EXISTS feature_data (
-	feature text,
-	weight double);
-	"""
-	) 
+        """CREATE TYPE IF NOT EXISTS feature_data (
+        feature text,
+        weight double);
+        """
+        )
 
     session.execute(
         """CREATE TABLE IF NOT EXISTS primary_relationships_table(
