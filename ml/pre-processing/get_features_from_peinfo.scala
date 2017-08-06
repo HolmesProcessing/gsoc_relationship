@@ -5,6 +5,7 @@ import play.api.libs.json._
 import java.io.{ByteArrayOutputStream, ByteArrayInputStream}
 import java.util.zip.{GZIPOutputStream, GZIPInputStream}
 import Array.concat
+import PreProcessingConfig._
 
 case class peinfo_results_by_service_name_class(service_name: String, sha256: String)
 case class peinfo_results_by_sha256_class(sha256: String, service_name: String, results: Array[Byte])
@@ -36,11 +37,12 @@ def findAllIntinpeinfo( peinfo_json_results : JsLookupResult, time: Double): Arr
     return List.toArray
 }
 
-val peinfo_results_by_service_name_meta = sc.cassandraTable[peinfo_results_by_service_name_class]("gsoc3","results_meta_by_service_name").where("service_name=?","peinfo")
+val peinfo_results_by_service_name_meta = sc.cassandraTable[peinfo_results_by_service_name_class](keyspace,service_name_table).where("service_name=?","peinfo")
 val peinfo_results_by_service_name_rdd = peinfo_results_by_service_name_meta.keyBy(x=> (x.sha256,x.service_name))
-val peinfo_results_by_sha256_meta = sc.cassandraTable[peinfo_results_by_sha256_class]("gsoc3","results_data_by_sha256")
+val peinfo_results_by_sha256_meta = sc.cassandraTable[peinfo_results_by_sha256_class](keyspace,sha256_table)
 val peinfo_results_by_sha256_rdd = peinfo_results_by_sha256_meta.keyBy(x => (x.sha256,x.service_name))
 val peinfo_join_results = peinfo_results_by_service_name_rdd.join(peinfo_results_by_sha256_rdd).map(x=> (new peinfo_join_results_class(x._1._1,x._1._2, unzip(x._2._2.results)))).distinct().cache()
+
 val peinfo_int_final_array_rdd = peinfo_join_results.map(x=>(x.sha256,(Json.parse(x.results) \ "pe_sections"),{if ((Json.parse(x.results) \ "timestamp").isInstanceOf[JsUndefined]) 0.0 else (Json.parse(x.results) \ "timestamp" \\ "timestamp")(0).as[Double]})).filter(x=> !x._2.isInstanceOf[JsUndefined]).map(x=>new  peinfo_int_final_array_rdd_class(x._1,findAllIntinpeinfo(x._2,x._3)))
 
 val peinfo_dllfunction_list= peinfo_join_results.map(x=>Json.parse(x.results) \ "imports").filter(x=> !x.isInstanceOf[JsUndefined]).flatMap(x=>x.as[List[Map[String, String]]].map(x=>(x("dll")+"."+x("function")))).toDF("func_name").groupBy("func_name").count.sort(desc("count")).filter("count > 10000").rdd.map(r => r.getString(0)).collect().toList
@@ -59,4 +61,4 @@ val peinfo_binaray_final_array_rdd_before_join = peinfo_binaray_final_array_rdd.
 val peinfo_array_rdd_by_join = peinfo_int_final_array_rdd_before_join.join(peinfo_binaray_final_array_rdd_before_join).map(x=> (x._1,concat(x._2._1,x._2._2)))
 val peinfo_final_array_rdd = peinfo_array_rdd_by_join.map(x=>new peinfo_final_array_rdd_class(x._1,x._2))
 
-peinfo_final_array_rdd.toDF().write.format("parquet").save("./peinfo_final_array.parquet")
+peinfo_final_array_rdd.toDF().write.format("parquet").save(peinfo_final_array_file)
