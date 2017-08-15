@@ -29,8 +29,8 @@ def schema_setup(ip_addresses, username, password, keyspace):
         """
         )
 
-    session.execute("""CREATE MATERIALIZED VIEW IF NOT EXISTS mv_feature_type_table AS
-        SELECT * FROM analytics_mv_knowledge_base_by_feature_table
+    session.execute("""CREATE MATERIALIZED VIEW IF NOT EXISTS analytics_mv_knowledge_base_by_feature_table AS
+        SELECT * FROM analytics_knowledge_base_table
         WHERE object_id IS NOT NULL
         AND feature_type IS NOT NULL
         AND feature_value IS NOT NULL

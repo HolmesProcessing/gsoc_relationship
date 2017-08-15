@@ -1,4 +1,4 @@
-name := "relationships-no-config"
+name := "relationships"
 
 version := "1.0"
 
@@ -12,8 +12,3 @@ libraryDependencies ++= Seq(
   "org.apache.spark" %% "spark-sql" % "2.2.0" % "provided",
   "com.typesafe" % "config" % "1.3.1"
 )
-
-/*assemblyMergeStrategy in assembly := {
-  case PathList("META-INF", xs @ _*) => MergeStrategy.discard
-  case x => MergeStrategy.first
-}*/
