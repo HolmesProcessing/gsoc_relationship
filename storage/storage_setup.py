@@ -19,57 +19,37 @@ def schema_setup(ip_addresses, username, password, keyspace):
 
     #Create the Knowledge Base tables and related Materialized Views
     session.execute(
-        """CREATE TABLE IF NOT EXISTS object_knowledge_base_table(
+        """CREATE TABLE IF NOT EXISTS analytics_knowledge_base_table(
         object_id text,
         feature_type text,
-        feature_value text,
+        feature_value blob,
         timestamp timeuuid,
-        PRIMARY KEY ((object_id), feature_type, feature_value, timestamp)
+        PRIMARY KEY ((object_id), feature_type, timestamp)
         );
         """
         )
 
-    session.execute(
-        """CREATE MATERIALIZED VIEW IF NOT EXISTS mv_feature_value_table AS
-        SELECT * FROM object_knowledge_base_table
+    session.execute("""CREATE MATERIALIZED VIEW IF NOT EXISTS mv_feature_type_table AS
+        SELECT * FROM analytics_mv_knowledge_base_by_feature_table
         WHERE object_id IS NOT NULL
         AND feature_type IS NOT NULL
         AND feature_value IS NOT NULL
         AND timestamp IS NOT NULL
-        PRIMARY KEY ((feature_value), feature_type, object_id, timestamp);
-        """
-        )
-
-    session.execute(
-        """CREATE MATERIALIZED VIEW IF NOT EXISTS mv_feature_type_table AS
-        SELECT * FROM object_knowledge_base_table
-        WHERE object_id IS NOT NULL
-        AND feature_type IS NOT NULL
-        AND feature_value IS NOT NULL
-        AND timestamp IS NOT NULL
-        PRIMARY KEY ((feature_type), feature_value, object_id, timestamp);
+        PRIMARY KEY ((feature_type), object_id, timestamp);
         """
         )
     
     #Create the Primary Relationships table
 
     session.execute(
-        """CREATE TYPE IF NOT EXISTS feature_data (
-        feature text,
-        weight double);
-        """
-        )
-
-    session.execute(
-        """CREATE TABLE IF NOT EXISTS primary_relationships_table(
+        """CREATE TABLE IF NOT EXISTS analytics_primary_relationships_table(
         object_id text,
         timestamp timeuuid,
-        imphash set<frozen <feature_data>>,
-        pehash set<frozen <feature_data>>,
-        binary_signature set<frozen <feature_data>>,
-        domain_requests set<frozen <feature_data>>,
-        yara_rules set<frozen <feature_data>>,
-        av_signatures set<frozen <feature_data>>,
+        imphash blob,
+        pehash blob,
+        binary_signature blob,
+        domain_requests blob,
+        yara_rules blob,
         PRIMARY KEY (object_id));
         """
         )
