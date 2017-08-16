@@ -1,4 +1,4 @@
-name := "relationships"
+name := "relationship"
 
 version := "1.0"
 

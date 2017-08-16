@@ -1,0 +1,18 @@
+cassandra {
+  hosts = "127.0.0.1"
+  username = "user"
+  password = "pwd"
+  keyspace = "keyspace"
+  analytics_knowledge_base = "analytics_knowledge_base"
+  analytics_mv_knowledge_base_by_feature = "analytics_mv_knowledge_base_by_feature"
+  analytics_primary_relationships = "analytics_primary_relationships"
+  results = "results"
+  results_meta = "results_meta"
+  results_data = "results_data"
+  objects_table = "objects_table"
+}
+
+spark {
+  appName = "relationship"
+  master = "localhost"
+}
