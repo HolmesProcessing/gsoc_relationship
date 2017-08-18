@@ -20,6 +20,7 @@ object KnowledgeBaseGenerator {
     //Input is a List[String] of hashes, the connector can query the table for each element in the batch in one go
     val results = sc.cassandraTable(keyspace,results_meta).where("sha256 in ?",batch).joinWithCassandraTable(keyspace,results_data).map(x=> (x._1.get[String]("sha256"), x._1.get[String]("service_name"), decompress(x._2.get[Array[Byte]]("results")))).cache()
 
+    //The rest of the code extracts the features defined in the documentation. One object can have several results generated at different times. Nothing is arbitrarily ignored, and features are extracted for each result.
     val peinfo_res = results.filter(x=> x._2 == "peinfo")
     val pehash = peinfo_res.map(x=> (x._1, (Json.parse(x._3) \ "pehash").asOpt[String].getOrElse("Undefined"))).filter(x => !x._2.equals("Undefined")).map(x => new Knowledge_Base(x._1, "pehash", compress(x._2.getBytes), UUIDs.timeBased()))
     val imphash = peinfo_res.map(x=> (x._1, (Json.parse(x._3) \ "imphash").asOpt[String].getOrElse("Undefined"))).filter(x => !x._2.equals("Undefined")).map(x => new Knowledge_Base(x._1, "imphash", compress(x._2.getBytes), UUIDs.timeBased()))

@@ -5,7 +5,7 @@ import com.holmesprocessing.analytics.relationship.SparkConfig._
 import play.api.libs.json.Json
 import com.datastax.spark.connector._
 
-
+/*This file contains intermediate methods for generating Primary Relationships.*/
 object SetUp {
 
   //find all primary relationships based on the pehash feature
@@ -61,7 +61,6 @@ object SetUp {
       return compress(Array[Byte](0))
     }
   }
-
 
   //find all primary relationships based on the yara feature
   def generate_yara(id:String) : Array[Byte] = {
