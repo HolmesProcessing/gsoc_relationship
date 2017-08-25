@@ -3,15 +3,14 @@ cassandra {
   username = "user"
   password = "pwd"
   keyspace = "keyspace"
-  analytics_knowledge_base = "analytics_knowledge_base"
-  analytics_mv_knowledge_base_by_feature = "analytics_mv_knowledge_base_by_feature"
-  analytics_primary_relationships = "analytics_primary_relationships"
+  knowledge_base_table = "knowledge_base_table"
+  mv_feature_type_table = "mv_feature_type_table"
+  primary_relationships_table = "primary_relationships_table"
   results = "results"
-  results_meta = "results_meta"
-  results_data = "results_data"
-  objects_table = "objects_table"
+  results_meta_by_sha256 = "results_meta_by_sha256"
+  results_data_by_sha256 = "results_data_by_sha256"
 }
 spark {
-  appName = "relationship"
+  appName = "relationships"
   master = "localhost"
 }
