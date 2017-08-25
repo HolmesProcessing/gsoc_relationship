@@ -1,14 +1,17 @@
-object PreProcessingConfig {
+import com.typesafe.config._
+import java.io._
+val conf = ConfigFactory.parseFile(new File("../config/pre-processing.conf"))
+object PreProcessingConfig extends Serializable{
+  val kmeans_cluster_number = conf.getInt("preprocess.kmeans_cluster_number");
+  val keyspace = conf.getString("preprocess.keyspace")
+  val service_name_table = conf.getString("preprocess.service_name_table")
+  val sha256_table = conf.getString("preprocess.sha256_table")
+  val VT_signatures_prefix_suffix_file = conf.getString("preprocess.VT_signatures_prefix_suffix_file")
+  val objdump_x86Opcodes_file = conf.getString("preprocess.objdump_x86Opcodes_file")
 
-  val keyspacekeyspace = "gsoc3"
-  val service_name_table = "results_meta_by_service_name"
-  val sha256_table = "results_data_by_sha256"
-  val VT_signatures_prefix_suffix_file = "./prefix.txt"
-  val objdump_x86Opcodes_file = "./x86Opcodes"
-
-  val VT_sample_signatures_final_array_file = "./VT_sample_signatures_final_array.parquet" 
-  val VT_sample_label_file = "./VT_sample_label.parquet"
-  val peinfo_final_array_file = "./peinfo_final_array.parquet"
-  val objdump_binaray_final_array_file = "./objdump_binaray_final_array.parquet"
-  val VT_peinfo_objdump_join_file = "./VT_peinfo_objdump_join.parquet"
+  val VT_sample_signatures_final_array_file = conf.getString("preprocess.VT_sample_signatures_final_array_file")
+  val VT_sample_label_file = conf.getString("preprocess.VT_sample_label_file")
+  val peinfo_final_array_file = conf.getString("preprocess.peinfo_final_array_file")
+  val objdump_binaray_final_array_file = conf.getString("preprocess.objdump_binaray_final_array_file")
+  val VT_peinfo_objdump_join_file = conf.getString("preprocess.VT_peinfo_objdump_join_file")
 }

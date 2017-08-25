@@ -1,10 +1,15 @@
-%gsocspark
 import com.datastax.spark.connector._
 import play.api.libs.json.Json
 import play.api.libs.json._
 import java.io.{ByteArrayOutputStream, ByteArrayInputStream}
 import java.util.zip.{GZIPOutputStream, GZIPInputStream}
 import Array.concat
+import org.apache.spark.sql.types._
+import org.apache.spark.ml.linalg.SQLDataTypes.VectorType 
+import org.apache.spark.ml.linalg._
+import org.apache.spark.sql.Row
+import org.apache.spark.ml.feature.MinMaxScaler
+import org.apache.spark.ml.linalg.DenseVector
 import PreProcessingConfig._
 
 case class peinfo_results_by_service_name_class(service_name: String, sha256: String)
@@ -19,10 +24,9 @@ def unzip(x: Array[Byte]) : String = {
     val output = scala.io.Source.fromInputStream(inputStream).mkString
     return output
 }
-val List17 = Array.iterate(0.0,17)(a=>a*0)
 def findAllIntinpeinfo( peinfo_json_results : JsLookupResult, time: Double): Array[Double]= {
     val entropy = peinfo_json_results \\ "entropy" ; val virt_address = peinfo_json_results \\ "virt_address"; val virt_size = peinfo_json_results \\ "virt_size"; val size = peinfo_json_results \\ "size";
-    var i= 0; var List  = List17
+    var i= 0; var List  = Array.iterate(0.0,17)(a=>a*0)
     for (k <- ( peinfo_json_results \\ "section_name")){
         k.as[String] match {
             case ".text\u0000\u0000\u0000" => { List(0)=entropy(i).as[Double]; List(1)=Integer.parseInt(virt_address(i).as[String].substring(2), 16).toDouble; List(2)=virt_size(i).as[Double]; List(3)=size(i).as[Double] }
@@ -61,4 +65,14 @@ val peinfo_binaray_final_array_rdd_before_join = peinfo_binaray_final_array_rdd.
 val peinfo_array_rdd_by_join = peinfo_int_final_array_rdd_before_join.join(peinfo_binaray_final_array_rdd_before_join).map(x=> (x._1,concat(x._2._1,x._2._2)))
 val peinfo_final_array_rdd = peinfo_array_rdd_by_join.map(x=>new peinfo_final_array_rdd_class(x._1,x._2))
 
-peinfo_final_array_rdd.toDF().write.format("parquet").save(peinfo_final_array_file)
+val peinfo_schema = new StructType().add("sha256", StringType).add("peinfo",VectorType)
+val peinfo_vector_rdd = peinfo_final_array_rdd.map(x=>(x.sha256,Vectors.dense(x.array_results)))
+val peinfo_vector_rowrdd = peinfo_vector_rdd.map(p => Row(p._1,p._2))
+val peinfo_vector_dataframe = spark.createDataFrame(peinfo_vector_rowrdd, peinfo_schema)
+val peinfo_scaler = new MinMaxScaler()
+  .setInputCol("peinfo")
+  .setOutputCol("scaled_peinfo")
+val peinfo_scalerModel = peinfo_scaler.fit(peinfo_vector_dataframe)
+val peinfo_scaledData_df = peinfo_scalerModel.transform(peinfo_vector_dataframe)
+val peinfo_scaledData_rdd = peinfo_scaledData_df.select("sha256","scaled_peinfo").rdd.map(row=>(row.getAs[String]("sha256"),row.getAs[DenseVector]("scaled_peinfo"))).map(x=>new peinfo_final_array_rdd_class(x._1,x._2.toArray))
+peinfo_scaledData_rdd.toDF().write.format("parquet").save(peinfo_final_array_file)
